@@ -1,15 +1,16 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import  DeleteConfirmation  from "./DeleteConfirmationPopUp";
 import "../styles/Settings.css";
-import { getAuth, deleteUser } from "firebase/auth"; // for delete profile
-//import { getAuth, updateProfile } from "firebase/auth";
-//import { db } from "../firebase";
+import { getAuth, deleteUser, updateProfile } from "firebase/auth";
+import { db } from "../firebase";
+import { doc, setDoc, deleteDoc } from "firebase/firestore";
 
 const Settings = ({ user }) => {
   // State for toggling the settings visibility
   const [showSettings, setShowSettings] = useState(true);
-  //const [newDisplayName, setNewDisplayName] = useState("");
-  const [error] = useState(null);
+  const [newDisplayName, setNewDisplayName] = useState("");
+  const [error] = useState("");
 
   // Function for handling the closing of the settings modal
   const handleSettingsClose = () => {
@@ -21,34 +22,37 @@ const Settings = ({ user }) => {
   if (!showSettings) return null;
 
   // Function to change the display name - WORKING PROGRESS
-  /*
   const changeDisplayName = async (newDisplayName) => {
+    // Check if the user is logged in
+    const auth = getAuth();
+    const user = auth.currentUser;
     try {
-      // Check if the user is logged in
-      const user = getAuth().currentUser;
-  
-      if (user) {
-        // User is logged in, update display name
-        await updateProfile(user, {
-          displayName: newDisplayName
-        });
-  
-        // Update display name in Firestore
-        await db.collection("users").doc(user.uid).update({
-          displayName: newDisplayName
-        });
-  
-        console.log("Display name updated successfully");
-      } else {
-        // User is not logged in
-        console.error("No user signed in");
-        setError("No user signed in");
-      }
+        if (user) {
+            // Fetch user's email
+            const userEmail = user.email;
+
+            // Delete existing document
+            await deleteDoc(doc(db, "users", user.uid));
+            console.log("Deleted old user document from Firestore");
+
+            // Update user profile display name
+            await updateProfile(user, {
+                displayName: newDisplayName,
+            });
+            console.log("Updated user profile display name");
+
+            await setDoc(doc(db, "users", user.uid), {
+                uid: user.uid,
+                username: newDisplayName,
+                email: userEmail,
+            });
+            console.log("Created new user document in Firestore");
+        }
     } catch (error) {
-      console.error("Error updating display name:", error);
-      setError(error.message);
+        console.error("Error occurred while updating user data:", error);
     }
-  };*/
+};
+
   
 
   // DELETE ACCOUNT
@@ -60,11 +64,14 @@ const Settings = ({ user }) => {
       if (user) {
         await deleteUser(user);
         console.log("User account deleted successfully");
+
+        await deleteDoc(doc(db, "users", user.uid)); // Delete user document from Firestore
       } else {
         console.error("No user signed in");
       }
     } catch (error) {
       console.error("Error deleting user account:", error.message);
+      
     }
   };
 
@@ -86,7 +93,7 @@ const Settings = ({ user }) => {
         {/* end of close-button */}
         {/* Form for user settings */}
         <h2>Settings</h2>
-        <form className="settings-form">
+        <div className="settings-form">
           {/* Column container for settings */}
           <div className="column">
             {/* Subtitle for the account settings */}
@@ -106,20 +113,21 @@ const Settings = ({ user }) => {
             {/* end of column */}
             <label htmlFor="displayName">Display Name:</label>
             {/* Label for display name input with text type and placeholder text*/}
-            <input
-              type="text"
-              id="displayName"
-              name="displayName"
-              placeholder="Change your display name"
-              /*value={newDisplayName}
-              onChange={(e) => setNewDisplayName(e.target.value)}*/
-            />
-            
-            {/* Button to change display name */}
-            <button /*onClick={() => changeDisplayName(newDisplayName)}*/>
-              Change Display Name
-            </button>
-            {error && <p className="error-message">{error}</p>}
+            <form className="settings-form" onSubmit={(e) => e.preventDefault()}>
+              <label htmlFor="newDisplayName">New Display Name:</label>
+              <input
+                type="text"
+                id="newDisplayName"
+                name="newDisplayName"
+                placeholder="Enter new display name"
+                value={newDisplayName}
+                onChange={(e) => setNewDisplayName(e.target.value)}
+              />
+              <button onClick={() => changeDisplayName(newDisplayName)}>
+                Change Display Name
+              </button>
+              {error && <p className="error-message">{error}</p>}
+          </form>
             {/* Label for email input with email type and placeholder text*/}
             <label htmlFor="email">Email:</label>
             <input
@@ -161,7 +169,7 @@ const Settings = ({ user }) => {
             {/* end of settings-content */}
           </div>{" "}
           {/* end of column */}
-        </form>{" "}
+        </div>{" "}
         {/* end of settings-form */}
         <form className="settings-form">
           <div className="column">
@@ -169,7 +177,7 @@ const Settings = ({ user }) => {
             <h3>Danger Zone</h3>
             {/* Delete Account */}
             <div className="settings-content">
-            <button className="delete-account-button" onClick={handleDeleteAccount}>Delete Account</button>
+            <DeleteConfirmation onDelete={handleDeleteAccount} />
             </div>
             {/* end of settings-content */}
           </div>

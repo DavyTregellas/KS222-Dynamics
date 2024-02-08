@@ -1,0 +1,58 @@
+/* DeleteConfirmation.css */
+
+/* Center the modal vertically and horizontally */
+.modal-dialog {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: none; /* Remove the border */
+    box-shadow: none; /* Remove the box shadow */
+}
+
+/* Style the modal title */
+.modal-title {
+    padding-top: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Style the modal body */
+.modal-body {
+    font-size: 18px;
+    color: #666;
+    padding-left: 15px;
+    padding-bottom: 5px;
+}
+
+/* Style the Cancel button */
+.cancel-button {
+    background-color: #ccc;
+    color: #333;
+    padding: 10px 20px; /* Add padding to increase button size */
+    border: none; /* Remove the border */
+    transition: background-color 0.3s; /* Add transition for smoother hover effect */
+    border-radius: 5px;
+}
+
+.cancel-button:hover {
+    background-color: #bbb; /* Darken the background color on hover */
+}
+
+/* Style the Delete button */
+.delete-button {
+    background-color: #dc3545;
+    color: white;
+    padding: 10px 20px; /* Add padding to increase button size */
+    border: none; /* Remove the border */
+    transition: background-color 0.3s; /* Add transition for smoother hover effect */
+    border-radius: 5px;
+    margin-right: 10px; /* Add margin between buttons */
+    margin-bottom: 10px;
+
+}
+
+.delete-button:hover {
+    background-color: #c82333; /* Darken the background color on hover */
+}
